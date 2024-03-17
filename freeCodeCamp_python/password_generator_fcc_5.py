@@ -2,13 +2,8 @@ import re
 import secrets
 import string
 
-# for constraint, pattern in constraints:
-        #     if constraint <= len(re.findall(pattern, password)):
-        #         count += 1
-            
-        # if count == 4:
+def generate_password(length=16, nums=1, special_chars=1, uppercase=1, lowercase=1):
 
-def generate_password(length, nums, special_chars, uppercase, lowercase):
     # Define the possible characters for the password
     letters = string.ascii_letters
     digits = string.digits
@@ -19,21 +14,33 @@ def generate_password(length, nums, special_chars, uppercase, lowercase):
 
     while True:
         password = ''
-        # Generate password
+        # Generating password
         for _ in range(length):
             password += secrets.choice(all_characters)
-       
+        
         constraints = [
             (nums, r'\d'),
-            (lowercase, r'[a-z]'),
-            (uppercase, r'[A-Z]'),            
-            (special_chars, fr'[{symbols}]')            
-        ]
+            (special_chars, fr'[{symbols}]'),
+            (uppercase, r'[A-Z]'),
+            (lowercase, r'[a-z]')
+        ] 
 
-        # Check constraints
-        count = 0
+        # Check constraints (using for loop)
+        # for constraint, pattern in constraints:
+        #     if constraint <= len(re.findall(pattern, password)):
+        #         count += 1
+        # if count == 4:
 
+        # Check constraints (using expression generator)
+        if all(
+            constraint <= len(re.findall(pattern, password))
+            for constraint, pattern in constraints
+        ):
+            break
+    
     return password
 
-# new_password = generate_password(8)
-# print(new_password)
+#making sure that th code won't run when imported as a module
+if __name__ == '__main__':   
+    new_password = generate_password()
+    print('Generated password:', new_password)
