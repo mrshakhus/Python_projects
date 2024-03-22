@@ -13,22 +13,23 @@
 
 Список из нечётных чисел от 1 до N: [1, 3, 5, 7, 9, 11, 13]
 '''
-while False:
-    N = input('Введите число: ')
+def print_from_0_to_N():
+    while True:
+        N = input('Введите число: ')
 
-    if not N:
-        print('Введите число!')
-        break
-    elif N == 'exit':
-        print('Программа завершена')
-        break
-    elif not N.isdigit():
-        print('Вводить можно лишь цифры!')
-        break
-    
-    N = int(N) + 1
-    from_0_to_N = list(range(N))
-    print(f'Список из нечетных чисел от 1 до N: {from_0_to_N[1:N:2]}')
+        if not N:
+            print('Введите число!')
+            break
+        elif N == 'exit':
+            print('Программа завершена')
+            break
+        elif not N.isdigit():
+            print('Вводить можно лишь цифры!')
+            break
+        
+        N = int(N) + 1
+        from_0_to_N = list(range(N))
+        print(f'Список из нечетных чисел от 1 до N: {from_0_to_N[1:N:2]}')
 
 
 
@@ -46,78 +47,113 @@ while False:
 Отсортированный список: [-7, -4, 0, 2, 6, 11, 15]
 '''
 from random import randint
-while True:
-    N = input('Введите число: ')
 
-    if not N:
-        print('Введите число!')
-        break
-    elif N == 'exit':
-        print('Программа завершена')
-        break
-    elif not N.isdigit():
-        print('Вводить можно лишь цифры!')
-        break
-    
-    N = int(N)
-    array_of_N = list(range(N))
-    for index in range(N):
-        array_of_N[index] = randint(-N, N)
-    print('Изначальный список: ', array_of_N)
+def sort_array():
+    while True:
+        N = input('Введите число: ')
 
-    # 1-й способ
-    # array_of_N = sorted(array_of_N)
-    # print('Отсортированный список: ', array_of_N)
+        if not N:
+            print('Введите число!')
+            break
+        elif N == 'exit':
+            print('Программа завершена')
+            break
+        elif not N.isdigit():
+            print('Вводить можно лишь цифры!')
+            break
+        
+        N = int(N)
+        array_of_N = list(range(N))
+        for index in range(N):
+            array_of_N[index] = randint(-N, N)
+        print('Изначальный список: ', array_of_N)
 
-    # 2-й способ
-    sorted_array = list(range(N))
-    smallest_number_in_array = array_of_N[0]
-    greatest_number_in_array = array_of_N[0]
-    index1 = 0
+        #1-й способ
+        array_of_N_sorted = sorted(array_of_N)
+        print('1-й способ: отсортированный список: ', array_of_N_sorted)
 
-    while index1 != N:
+        # 2-й способ
+        sorted_array = list(range(N))
+        smallest_number_in_array = array_of_N[0]
+        greatest_number_in_array = array_of_N[0]
+        index1 = 0
 
-        for number_in_array in array_of_N:
-            if number_in_array == smallest_number_in_array:
-                continue
-            elif number_in_array < smallest_number_in_array:
-                smallest_number_in_array = number_in_array
-            else:
-                greatest_number_in_array = number_in_array
+        while index1 < N:
+            count_same_numbers = 0
 
-        for index_to_delete, number_in_array in enumerate(array_of_N ):
-            if smallest_number_in_array == number_in_array:
-                array_of_N[index_to_delete] = greatest_number_in_array
+            for number_in_array in array_of_N:
+                if number_in_array == smallest_number_in_array:
+                    continue
+                elif number_in_array < smallest_number_in_array:
+                    smallest_number_in_array = number_in_array
+                elif number_in_array  > greatest_number_in_array:
+                    greatest_number_in_array = number_in_array
 
-        sorted_array[index1] = smallest_number_in_array
-        smallest_number_in_array = 0
-        index1 += 1
-    
-    print('Отсортированный список: ', sorted_array)
+            for index_to_ignore, number_in_array in enumerate(array_of_N ):
+                if smallest_number_in_array == number_in_array:
+                    count_same_numbers += 1
+                    array_of_N[index_to_ignore] = N + 1
 
+            for _ in range(count_same_numbers):
+                sorted_array[index1] = smallest_number_in_array
+                index1 += 1
+
+            smallest_number_in_array = greatest_number_in_array
+            
+        
+        print('2-й способ: отсортированный список: ', sorted_array)
+
+
+
+'''
+В базе данных магазина одежды хранится список названий товаров и сколько они стоят:
+
+shop = [['футболка', 800], ['кроссовки', 5000], ['штаны', 500], ['шорты', 960], ['штаны', 450], ['кепка', 600], ['куртка', 9000], ['кроссовки', 2000], ['штаны', 870]]
+
+Напишите программу, которая запрашивает у пользователя товар, считает их количество, а также общую стоимость.
+
+Пример:
+
+Название товара: штаны
+
+Кол-во товаров - 3  
+
+Общая стоимость - 1820
+'''
+import string
+import re
+
+def show_clothing_price():
+    while True:
+        shop = [['футболка', 800], ['кроссовки', 5000], ['штаны', 500], ['шорты', 960], ['штаны', 450], ['кепка', 600], ['куртка', 9000], ['кроссовки', 2000], ['штаны', 870]]
+
+        clothing = input('\nВведите название одежды: ')
+
+        all_characters = string.ascii_letters + string.digits + string.punctuation
+        is_exception = False
+
+        if clothing == '':
+            print('Введите название одежды!')
+            is_exception = True
+        elif clothing == 'exit':
+            break
+        elif re.search(fr'[{all_characters}]', clothing):
+            print('Можно вводить лишь кириллицу!')
+            is_exception = True
         
 
+        total_price = 0
+        number_of_item = 0
+        is_there = False
 
-
-
-
-
-# def merge_sort(unordered_list):
-#     if len(unordered_list <=1):
-#         return
-    
-#     middle_index = len(unordered_list)//2
-#     left_array = unordered_list[:middle_index]
-#     right_array = unordered_list[middle_index:]
-
-#     merge_sort(left_array)
-#     merge_sort(right_array)
-
-#     if 
-
-    
-
-
-
-
-
+        for list in shop:
+            if list[0] == clothing:
+                total_price += list[1]
+                number_of_item += 1
+                is_there = True
+        
+        if not is_there and not is_exception:
+            print('Нет в наличии')
+        
+        if is_there:
+            print(f'Количество товаров - {number_of_item}\nОбщая стоимость - {total_price}\n')
