@@ -38,6 +38,7 @@ def add_time(start, duration, week_day = None):
     time = start.split()[0]
     ampm_initial = start.split()[1]
     ampm_new = ''
+    all_week_days = []
 
     hours = time.split(':')[0]
     minutes = time.split(':')[1]
@@ -49,6 +50,8 @@ def add_time(start, duration, week_day = None):
     duration_hours = int(duration_hours)
     duration_minutes = int(duration_minutes)
 
+    #calculating hours from minutes from current time and added time
+    #and calculating minutes for final result
     hours_from_minutes = int((minutes + duration_minutes)/60)
 
     if hours_from_minutes:
@@ -56,31 +59,75 @@ def add_time(start, duration, week_day = None):
     else:
         minutes = minutes + duration_minutes
 
-    days_passed = int((duration_hours)/24)
-    cycles_of_12 = int((hours + duration_hours + hours_from_minutes)/12)
-    new_time_hours = (hours + duration_hours + hours_from_minutes) % 12
+
+    total_hours = hours + duration_hours + hours_from_minutes
+
+    days_passed = int(total_hours/24)
+    cycles_of_12 = int(total_hours/12)
+    new_time_hours = total_hours % 12
+
+    if new_time_hours == 0:
+        new_time_hours = 12
      
+    #making a transition between AM and PM
+    ampm_new = ampm_initial
+
     if cycles_of_12 % 2 != 0:
+        if days_passed == 1:
+            days_passed += 1
         if ampm_initial == 'AM':
             ampm_new = 'PM'
         else:
             ampm_new = 'AM' 
-    ampm_new = ampm_initial
+            if total_hours/24 >= 12:
+                days_passed += 1
 
+    #finding out which week day will be after added time
+    if week_day:
+        all_week_days = ['Monday','Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        to_next_week_day = days_passed % 7
+        week_day_index = 0
+
+        for index in range(7):
+            if all_week_days[index].lower() == week_day.lower():
+                week_day_index = index
+                break
+        
+        week_day_index = (week_day_index + to_next_week_day) % 7
+        week_day = all_week_days[week_day_index]
+
+        
+        
+
+    #making final result
     new_time = str(new_time_hours) + ":" + str(minutes).rjust(2,'0') + f' {ampm_new}'
     
-    text_days_later = ''
-    if days_passed == 0 and ampm_initial == 'PM' and ampm_new == 'AM':
-        text_days_later = ' (next day)'
-    elif days_passed == 0:
-        text_days_later = ''
+    if week_day:
+        text_days_later = f', {week_day}'
     else:
-        text_days_later = f' ({days_passed} days later)'
+        text_days_later = ''
+
+
+    if (days_passed == 0 or days_passed == 1) and ampm_initial == 'PM' and ampm_new == 'AM':
+        text_days_later += ' (next day)'
+    elif days_passed == 0:
+        text_days_later += ''
+    elif days_passed == 1:
+        text_days_later += ' (next day)'
+    else:
+        text_days_later += f' ({days_passed} days later)'
     
     new_time += text_days_later
         
 
     return new_time
 
-#print(add_time('3:30 PM', '2:12')) #1
+print(add_time('3:30 PM', '2:12')) #1
 print(add_time('11:55 AM', '3:12')) #2
+print(add_time('2:59 AM', '24:00')) #3
+print(add_time('11:59 PM', '24:05')) #4
+print(add_time('8:16 PM', '466:02')) #5
+print(add_time('3:30 PM', '2:12', 'Monday')) #6
+print(add_time('2:59 AM', '24:00', 'saturDay')) #7
+print(add_time('11:59 PM', '24:05', 'Wednesday')) #8
+print(add_time('8:16 PM', '466:02', 'tuesday')) #9
