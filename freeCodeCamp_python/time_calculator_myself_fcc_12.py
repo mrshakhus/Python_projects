@@ -82,7 +82,7 @@ def add_time(start, duration, week_day = None):
             if total_hours/24 >= 12:
                 days_passed += 1
 
-    #finding out which week day will be after added time
+    #figuring out which week day will be after added time
     if week_day:
         all_week_days = ['Monday','Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         to_next_week_day = days_passed % 7
@@ -96,9 +96,6 @@ def add_time(start, duration, week_day = None):
         week_day_index = (week_day_index + to_next_week_day) % 7
         week_day = all_week_days[week_day_index]
 
-        
-        
-
     #making final result
     new_time = str(new_time_hours) + ":" + str(minutes).rjust(2,'0') + f' {ampm_new}'
     
@@ -106,7 +103,6 @@ def add_time(start, duration, week_day = None):
         text_days_later = f', {week_day}'
     else:
         text_days_later = ''
-
 
     if (days_passed == 0 or days_passed == 1) and ampm_initial == 'PM' and ampm_new == 'AM':
         text_days_later += ' (next day)'
