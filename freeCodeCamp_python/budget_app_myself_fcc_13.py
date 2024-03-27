@@ -63,7 +63,107 @@ Percentage spent by category
 '''
 
 class Category:
-    pass
+    def __init__(self, name):
+        self.name = name
+        self.ledger = []
+        self.balance = 0.00
+
+    def __str__(self):
+        new_line = '\n'
+        centered_name = self.name.center(30, '*')
+        initial_deposit_string = 'initial deposit'.ljust(23)
+        initial_deposit_dictionary = self.ledger[0]
+        total_balance = initial_deposit = initial_deposit_dictionary["amount"]
+        result_for_print = centered_name + new_line + initial_deposit_string + str(initial_deposit).rjust(7) + new_line
+
+        for line in self.ledger:
+            if len(line["description"]) > 23:
+                result_for_print += line["description"][:23]
+            else:
+                result_for_print += line["description"].ljust(23)
+            
+            result_for_print += str(line["amount"]).rjust(7) + new_line
+            total_balance -= line["amount"]
+
+        result_for_print += "Total: " + str(round(total_balance,2))
+        return result_for_print
+        
+    def deposit(self, amount, description=""):
+        self.ledger.append({"amount": amount, "description": description})
+        self.balance += amount
+
+    def withdraw(self, amount, description):
+        if self.check_funds(amount):
+            self.ledger.append({"amount": -amount, "description": description})
+            return True
+        else:
+            return False
+
+    def get_balance(self):
+        total_balance = (self.ledger[0])["amount"]
+        for line in self.ledger:
+            total_balance += line["amount"]
+
+        return total_balance
+        
+    def transfer(self, amount, destination_category):
+        if self.check_funds(amount):
+            self.withdraw(amount, f"Transfer to {destination_category.name}")
+            destination_category.deposit(amount, f"Transfer from {self.name}")
+            return True
+        else:
+            return False
+
+    def check_funds(self, amount):
+        if amount > self.balance:
+            return False
+        else:
+            return True
+
 
 def create_spend_chart(categories):
-    pass
+    final_result = 'Percentage spent by category'
+    new_line = '\n'
+    percents = []
+    for category in categories:
+        category_instance = Category(category)
+        total_balance = (category_instance.ledger[0])["amount"]
+        total_withdrawals = 0
+        for line in category_instance:
+            if line["amount"] < 0:
+                total_withdrawals -= line["amount"]
+        percents.append((total_withdrawals/total_balance)//10)
+    
+    for index_multipler in range(11):
+        percent_number = 100 - index_multipler*10
+        final_result += f'{percent_number}|'.rjust(4) + ' '
+        
+        for index in range(len(categories)):
+            if percents[index] <= percent_number/10:
+                final_result += "o  "
+            else:
+                final_result += "   "
+        
+    final_result += new_line + '    '
+        
+    for _ in range(3*len(categories) + 2):
+        final_result += '-'
+
+    final_result += new_line
+
+    longest_category_name = len(max(categories, key=len))
+    for index in range(longest_category_name):
+        for category in categories:
+            final_result += '     '
+            if index < len(category): 
+                final_result += category[index] + '  ' + new_line
+            else:
+                final_result += '   ' + new_line
+
+food = Category("Food")
+food.deposit(1000, "deposit")
+food.withdraw(10.15, "groceries")
+food.withdraw(15.89, "restaurant and more food for dessert")
+clothing = Category("Clothing")
+food.transfer(50, clothing)
+print(food)
