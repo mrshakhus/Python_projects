@@ -74,12 +74,9 @@ class Category:
         result_for_print = centered_name + new_line
 
         for line in self.ledger:
-            if len(line["description"]) > 23:
-                result_for_print += line["description"][:23]
-            else:
-                result_for_print += line["description"].ljust(23)
-            
-            result_for_print += str(line["amount"]).rjust(7) + new_line
+            line_description = '{:<23}'.format(line["description"])
+            line_amount = '{:>7.2f}'.format(line["amount"])
+            result_for_print += line_description[:23] + line_amount[:7] + new_line
 
         result_for_print += "Total: " + str(round(self.balance,2))
         return result_for_print
@@ -90,7 +87,7 @@ class Category:
 
     def withdraw(self, amount, description=""):
         if self.check_funds(amount):
-            self.ledger.append({"amount": -amount, "description": description})
+            self.ledger.append({"amount": -1 * amount, "description": description})
             self.balance -= amount
             return True
         else:
@@ -100,8 +97,7 @@ class Category:
         return self.balance
         
     def transfer(self, amount, destination_category):
-        if self.check_funds(amount):
-            self.withdraw(amount, f"Transfer to {destination_category.name}")
+        if self.withdraw(amount, f"Transfer to {destination_category.name}"):
             destination_category.deposit(amount, f"Transfer from {self.name}")
             return True
         else:
@@ -117,30 +113,28 @@ class Category:
 def create_spend_chart(categories):
     new_line = '\n'
     final_result = 'Percentage spent by category' + new_line
-    percents = []
     category_list = []
+    amount_spent = []
 
-    #calculatng percentege of expenses divided by 10
     for category in categories:
-        total_balance = (category.ledger[0])["amount"]
-        total_withdrawals = 0
-        for index in range(len(category.ledger)):
-            if (category.ledger[index])["amount"] < 0:
-                total_withdrawals -= (category.ledger[index])["amount"]
-        percents.append(int((total_withdrawals/total_balance)*10))
+        for item in category.ledger:
+            if item["amount"] < 0:
+                amount_spent.append(round(abs(item["amount"]), 2))
     
+    total_sum = sum(amount_spent)
+    category_percent = list(map(lambda amount: int((amount/total_sum)*10)*10, amount_spent))
+
     #building a chart with percents and "o"-s
-    for index_multipler in range(11):
-        percent_number = 100 - index_multipler*10
-        final_result += f'{percent_number}|'.rjust(4) + ' '
+    for percent in range(100, -1, -10):
+        final_result += f'{percent}'.rjust(3) + '|'
         
         for index in range(len(categories)):
-            if percent_number/10 <= percents[index]:
-                final_result += "o  "
+            if category_percent[index] >= percent:
+                final_result += " o "
             else:
                 final_result += "   "
 
-        final_result += new_line
+        final_result += ' ' + new_line
         
 
     final_result += '    '
@@ -149,30 +143,22 @@ def create_spend_chart(categories):
     final_result += new_line
 
     #assembling name of categories vertically
-    for category in categories:
-        if len(category_list) > 4:
-            break
-        category_list.append(category.name)
+    if len(category_list) <= 4:
+        category_list = [category.name for category in categories]
 
-    longest_category_name = len(max(category_list, key=len))
-    for index in range(longest_category_name):
-        for category in category_list:
-            if category == category_list[0]:
-                final_result += '     '
-            if index < len(category): 
-                final_result += category[index] + '  ' 
-            else:
-                final_result += '   '
-        if index < longest_category_name:
-            final_result += new_line
+    max_length_name = len(max(category_list, key=len))
+    category_list = list(map(lambda category: category.ljust(max_length_name), category_list))
+
+    for single_letters in zip(*category_list):
+        final_result += "    " + "".join(map(lambda letter: letter.center(3), single_letters)) + ' \n'
     
-    return final_result
+    return final_result.rstrip('\n')
 
 
 food = Category("Food")
 food.deposit(900, "deposit")
 food.withdraw(45.67, "milk, cereal, eggs, bacon, bread")
-food.withdraw(500)
+food.withdraw(70)
 
 clothing = Category("Clothing")
 clothing.deposit(100, "deposit")
