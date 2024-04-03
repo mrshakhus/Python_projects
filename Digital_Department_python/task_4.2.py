@@ -52,11 +52,20 @@ with open('answer.txt', 'r+') as answer_file:
 import os.path
 
 path = os.path.abspath('numbers.txt')
-paths = list(path.split('/'))
+path_list = list(path.split('\\'))
 print(path)
 
+relative_path = list(path_list[i] for i in range(3,4))
 
-relative_path = list(path[i] for i in range(3,))
-
-path = os.path.join('Python_projects', path)
+path = os.path.join('Python_projects', *relative_path)
 print(path)
+
+# relative_path = []
+# count = 0
+# while True:
+#     compensater = 2
+#     count = compensater
+#     relative_path[count - compensater] = path[count]
+#     count += 1
+#     if count + compensater == len(path):
+#         break
