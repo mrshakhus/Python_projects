@@ -49,7 +49,7 @@ class Game:
                 self._grid[index] = f'| {item} |\n'
 
     def __check_if_someone_won(self, square_number):
-        is_win = [False for _ in range(3)]
+        is_win = [False for _ in range(2)]
         
         for index in range(2):
             #vertical:
@@ -59,7 +59,7 @@ class Game:
                 if incremented_index == 2 and is_win.all():
                     return is_win
 
-
+            is_win = [False for _ in range(2)]
             #horizontal:
             if square_number < 3:
                 divider = 3
@@ -68,12 +68,17 @@ class Game:
             else: 
                 divider = 9
 
-            if self._filling_list[(square_number + incremented_index)%divider] != self._whos_turn:
+            if self._filling_list[(square_number + incremented_index)%divider] == self._whos_turn:
                 is_win[index] = True
                 if incremented_index == 2 and is_win.all():
                     return is_win
             
+            is_win = [False for _ in range(2)]
             #diagonal:
+            if self._filling_list[index + 4*index] == self._whos_turn:
+                is_win[index] = True
+                if incremented_index == 2 and is_win.all():
+                    return is_win
 
         
         
