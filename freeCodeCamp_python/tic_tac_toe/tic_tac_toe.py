@@ -36,7 +36,7 @@ class Game:
     def __define_whos_turn(self):
         self._whos_turn = 'X' if self._whos_turn == 'O' else 'O'
             
-    def __chose_square_number(self):
+    def __chose_square_number_for_computer(self):
         square = random.choice(self._square_numbers)
         self._square_numbers.remove(square)
         return square
@@ -49,17 +49,16 @@ class Game:
                 self._grid[index] = f'| {item} |\n'
 
     def __check_if_someone_won(self, square_number):
-        is_win = [False for _ in range(2)]
-        
-        for index in range(2):
+        is_win = [False for _ in range(3)]
+        for index in range(3):
             #vertical:
-            incremented_index = index + 1
-            if self._filling_list[(square_number + 3*incremented_index)%9] == self._whos_turn:
+            if self._filling_list[(square_number + 3*index)%9] == self._whos_turn:
                 is_win[index] = True
-                if incremented_index == 2 and is_win.all():
-                    return is_win
+                if index == 2 and all(is_win):
+                    return True
 
-            is_win = [False for _ in range(2)]
+        is_win = [False for _ in range(3)]
+        for index in range(3):
             #horizontal:
             if square_number < 3:
                 divider = 3
@@ -67,27 +66,42 @@ class Game:
                 divider = 6
             else: 
                 divider = 9
-
-            if self._filling_list[(square_number + incremented_index)%divider] == self._whos_turn:
+        
+            if self._filling_list[(square_number + index + 1)%divider] == self._whos_turn:
                 is_win[index] = True
-                if incremented_index == 2 and is_win.all():
-                    return is_win
-            
-            is_win = [False for _ in range(2)]
+                if index == 2 and all(is_win):
+                    return True
+
+        is_win = [False for _ in range(3)]
+        for index in range(3):  
             #diagonal:
-            if self._filling_list[index + 4*index] == self._whos_turn:
+            if self._filling_list[4*index] == self._whos_turn:
                 is_win[index] = True
-                if incremented_index == 2 and is_win.all():
-                    return is_win
+                if index == 2 and all(is_win):
+                    return True
 
+        is_win = [False for _ in range(3)]
+        for index in range(3): 
+            if self._filling_list[2+2*index] == self._whos_turn:
+                is_win[index] = True
+                if index == 2 and all(is_win):
+                    return True
+                
+        return False
+
+    def __get_valid_square_number(self):
+        user_input = int(input(f"{self._whos_turn}'s turn. Input move (0-8): "))
+        while user_input not in self._square_numbers:
+            user_input = int(input("Input move (0-8): "))
+
+        self._square_numbers.remove(user_input)
+        return user_input
         
+    
+    def __allow_human_to_make_move(self):
         
-
-
-    def __make_move_for_computer(self):
-
         self.__define_whos_turn()
-        square_number = self.__chose_square_number()
+        square_number = self.__get_valid_square_number() 
 
         print(f"{self._whos_turn} makes a move to square {square_number}")
         for index in self._square_numbers:
@@ -97,28 +111,54 @@ class Game:
         self.__refill_grid(self._filling_list)
         print(''.join(self._grid))
 
+        if self.__check_if_someone_won(square_number):
+            print(f'"{self._whos_turn}" won')
+            self._is_gaming = False
+
+
+    def __make_move_for_computer(self):
+
+        self.__define_whos_turn()
+        square_number = self.__chose_square_number_for_computer()
+
+        print(f"{self._whos_turn} makes a move to square {square_number}")
+        for index in self._square_numbers:
+            self._filling_list[index] = ' '
+        self._filling_list[square_number] = self._whos_turn
+
+        self.__refill_grid(self._filling_list)
+        print(''.join(self._grid))
+
+        if self.__check_if_someone_won(square_number):
+            print(f'"{self._whos_turn}" won')
+            self._is_gaming = False
+
+    
 
 
     def __launch_human_vs_computer(self):
-        pass
+        while self._is_gaming:
+            if not self._square_numbers:
+                self._is_gaming = False
+                print('Tie')
+            self.__allow_human_to_make_move()
+            if self._is_gaming:
+                self.__make_move_for_computer()
 
     def __launch_human_vs_human(self):
-        pass
+        while self._is_gaming:
+            self.__allow_human_to_make_move()
+            if not self._square_numbers:
+                self._is_gaming = False
+                print('Tie')
 
     def __launch_computer_vs_computer(self): 
         while self._is_gaming:
             self.__make_move_for_computer()
             if not self._square_numbers:
                 self._is_gaming = False
+                print('Tie')
         
-            
-
-players = Player('computer vs computer')
+players = Player('human vs computer')
 tic_tac_toe = Game(players)
 tic_tac_toe.start_game()
-
-
-
-    
-
-    
