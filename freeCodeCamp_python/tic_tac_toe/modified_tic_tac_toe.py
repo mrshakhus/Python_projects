@@ -5,6 +5,7 @@ class Player:
     def __init__(self, letter):
         self.letter = letter
 
+
 class HumanPlayer(Player):
     def __init__(self, letter):
         super().__init__(letter)
@@ -30,6 +31,24 @@ class randomComputerPlayer(Player):
 
     def get_move(self, game):
         return random.choice(game.available_moves())
+
+
+class SmartComputerPlayer(Player):
+    def __init__(self, letter):
+        super().__init__(letter)
+
+    def get_move(self, game):
+        #implementing minimax:
+        #number of empty squares + 1
+        #if current player wins  1 * (number of empty squares + 1)
+        #if opponent wins  -1 * (number of empty squares + 1)
+        #in case of opponent gotta minimize 
+        #in case of current player maximize
+        empty_squares = game.empty_squares_number()
+        possible_moves = [{i:0} for i in range(empty_squares)]
+
+
+        pass
 
 
 
