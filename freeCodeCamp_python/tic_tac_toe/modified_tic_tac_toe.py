@@ -1,56 +1,5 @@
-import random
 import time
-
-class Player:
-    def __init__(self, letter):
-        self.letter = letter
-
-
-class HumanPlayer(Player):
-    def __init__(self, letter):
-        super().__init__(letter)
-
-    def get_move(self, game):
-        valid_square = False
-        value = None
-        while not valid_square:
-            value = input('Input move (0-8): ')
-            try:
-                value = int(value)
-                if value not in game.available_moves():
-                    raise ValueError
-                valid_square = True
-            except ValueError:
-                print('Invalid squre number. Please, try again')
-        return value
-
-
-class randomComputerPlayer(Player):
-    def __init__(self, letter):
-        super().__init__(letter)
-
-    def get_move(self, game):
-        return random.choice(game.available_moves())
-
-
-class SmartComputerPlayer(Player):
-    def __init__(self, letter):
-        super().__init__(letter)
-
-    def get_move(self, game):
-        #implementing minimax:
-        #number of empty squares + 1
-        #if current player wins  1 * (number of empty squares + 1)
-        #if opponent wins  -1 * (number of empty squares + 1)
-        #in case of opponent gotta minimize 
-        #in case of current player maximize
-        empty_squares = game.empty_squares_number()
-        possible_moves = [{i:0} for i in range(empty_squares)]
-
-
-        pass
-
-
+from tic_tac_toe_players import HumanPlayer, RandomComputerPlayer, SmartComputerPlayer
 
 class TicTacToe:
     def __init__(self):
@@ -60,6 +9,7 @@ class TicTacToe:
     @staticmethod
     def make_board():
         return [' ' for _ in range(9)]
+        #return ['X', 'O', 'X', 'X', 'O', ' ', ' ', ' ', 'O']
 
     @staticmethod
     def print_board_nums():
@@ -108,42 +58,60 @@ class TicTacToe:
         return ' ' in self.board
     
     def empty_squares_number(self):
-        return self.board.count()
+        return self.board.count(' ')
 
     def available_moves(self):
         return [i for i, x in enumerate(self.board) if x == ' ']
     
 def play(game, o_player, x_player, print_board = True):
     letter = 'X'
-    game.print_board_nums()
+
+    if print_board:
+        game.print_board_nums()
     
     while game.empty_squares():
         if print_board:
             game.print_board_nums()
 
-        print(f'{letter}\'s turn. ', end='')
+        if print_board:
+            print(f'{letter}\'s turn. ', end='')
+
         if letter == 'X':
             square = x_player.get_move(game)
         else:
             square = o_player.get_move(game)
         
         if game.make_move(square, letter):
-            print(f'{letter} makes a move to square {square}')
             game.board[square] = letter
-            game.print_board()
+            if print_board:
+                print(f'{letter} makes a move to square {square}')
+                game.print_board()
 
             if game.winner:
-                print(f'{letter} wins!')
+                if print_board:
+                    print(f'{letter} wins!')
                 return letter
 
             letter = 'O' if letter == 'X' else 'X'
 
-            time.sleep(0.5)
-
-    print('It\'s a tie!')
+            if print_board:
+                time.sleep(0.5)
+    if print_board:
+        print('It\'s a tie!')
 
 if __name__ == '__main__':
-    human = HumanPlayer('X')
-    computer = randomComputerPlayer('O')
-    ttt = TicTacToe()
-    play(ttt, computer, human, print_board=False)
+    x_wins = 0
+    o_wins = 0
+    ties = 0
+    for _ in range(1):
+        human = SmartComputerPlayer('X')
+        computer = RandomComputerPlayer('O')
+        ttt = TicTacToe()
+        if play(ttt, computer, human, print_board=False) == 'X':
+            x_wins += 1
+        elif play(ttt, computer, human, print_board=False) == 'O':
+            o_wins += 1
+        else:
+            ties += 1
+
+    print(f'{x_wins} X wins, {o_wins} O wins, {ties} ties')
