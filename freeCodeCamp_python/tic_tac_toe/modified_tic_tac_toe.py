@@ -111,7 +111,7 @@ if __name__ == '__main__':
             x_wins += 1
         elif play(ttt, computer, human, print_board=False) == 'O':
             o_wins += 1
-        else:
+        else: 
             ties += 1
 
     print(f'{x_wins} X wins, {o_wins} O wins, {ties} ties')
