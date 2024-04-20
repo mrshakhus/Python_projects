@@ -27,19 +27,21 @@ class SudokuSolver:
                     
     
     def valid_number(self, number, col, row):
-        if all(
+        if all([
             self.valid_in_row(number, row),
             self.valid_in_col(number, col),
             self.valid_in_nonet(number, row, col)
-        ):
+        ]):
             return True
         
         return False
 
 
     def solve_sudoku(self):
+        numbers_list = list(range(10))
+
         for row_index, row in enumerate(self.board):
-            numbers = set(range(9) + 1)
+            numbers = set(range(1,10))
             is_valid_number = False
             
             #removing existing numbers in board row from set
@@ -52,12 +54,22 @@ class SudokuSolver:
                     if len(numbers) == 0:
                         return False
                     
-                    number = random.choice(numbers)
+                    for list_number in numbers_list:
+                        if list_number in numbers:
+                            number = list_number
+                            break
+
                     numbers.remove(number)
 
                     if self.valid_number(number, row_index, col_index):
                         self.board[row_index][col_index] = number
-                        return self.solve_sudoku()
+                    else:
+                        return False
+                    
+                    if not self.solve_sudoku():
+                        self.board[row_index][col_index] = -1
+                        break
+                    
 
 
 
@@ -78,3 +90,7 @@ if __name__ == "__main__":
         [ 6,  7, -1,    1, -1,  5    -1,  4, -1],
         [ 1, -1,  9,   -1, -1, -1,    2, -1, -1]
     ]
+
+    sudoku_solver = SudokuSolver(example_board)
+    print(sudoku_solver.solve_sudoku())
+    print(example_board)
