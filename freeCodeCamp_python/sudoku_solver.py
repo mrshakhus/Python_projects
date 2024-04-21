@@ -26,9 +26,9 @@ class SudokuSolver:
         return True
                     
     
-    def valid_number(self, number, col, row):
+    def valid_number(self, number, row, col):
+        #self.valid_in_row(number, row),
         if all([
-            self.valid_in_row(number, row),
             self.valid_in_col(number, col),
             self.valid_in_nonet(number, row, col)
         ]):
@@ -38,11 +38,10 @@ class SudokuSolver:
 
 
     def solve_sudoku(self):
-        numbers_list = list(range(10))
 
         for row_index, row in enumerate(self.board):
             numbers = set(range(1,10))
-            is_valid_number = False
+            numbers_list = []
             
             #removing existing numbers in board row from set
             for number in row:
@@ -50,32 +49,36 @@ class SudokuSolver:
                     numbers.remove(number)
             
             for col_index, number in enumerate(row):
+
+                is_valid_number = False
+                if number != -1:
+                    continue
+
                 while not is_valid_number:
+                    #if there wasn't a valid number
                     if len(numbers) == 0:
                         return False
                     
-                    for list_number in numbers_list:
-                        if list_number in numbers:
-                            number = list_number
+                    #choosing random number from list
+                    numbers_list = [number for number in numbers]
+                    number = random.choice(numbers_list)
+
+                    #if chosen numbers is valid then put it into field, end while loop
+                    for number in numbers_list:
+                        if self.valid_number(number, row_index, col_index):
+                            self.board[row_index][col_index] = number
+                            numbers.remove(number)
                             break
+                        elif len(numbers) == 1:
+                            return False
 
-                    numbers.remove(number)
-
-                    if self.valid_number(number, row_index, col_index):
-                        self.board[row_index][col_index] = number
-                    else:
-                        return False
-                    
-                    if not self.solve_sudoku():
+                    if self.solve_sudoku():
+                        is_valid_number = True
+                        return True
+                    elif not self.solve_sudoku():
                         self.board[row_index][col_index] = -1
-                        break
+                        numbers.add(number)
                     
-
-
-
-
-
-
 if __name__ == "__main__":
     example_board = [
         [ 3,  9, -1,   -1,  5, -1,   -1, -1, -1],
@@ -86,8 +89,8 @@ if __name__ == "__main__":
         [ 2, -1,  6,   -1, -1,  3,   -1, -1, -1],
         [-1, -1, -1,   -1, -1, -1,   -1, -1,  4],
 
-        [ 5, -1, -1,   -1, -1, -1    -1, -1, -1],
-        [ 6,  7, -1,    1, -1,  5    -1,  4, -1],
+        [ 5, -1, -1,   -1, -1, -1,   -1, -1, -1],
+        [ 6,  7, -1,    1, -1,  5,   -1,  4, -1],
         [ 1, -1,  9,   -1, -1, -1,    2, -1, -1]
     ]
 
