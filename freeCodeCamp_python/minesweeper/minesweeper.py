@@ -24,21 +24,23 @@ class Minesweeper:
         
 
     def define_bomb_coords(self):
-        bomb_amount = 10
-        count = 0
-        while len(self.coords_of_bombs) < bomb_amount:
-            self.coords_of_bombs[count] = [(random.randrange(len(self.field))),(random.randrange(len(self.field)))]
-            count += 1
+        pass
+        # bomb_amount = 10
+        # count = 0
+        # while len(self.coords_of_bombs) < bomb_amount:
+        #     self.coords_of_bombs[count] = [(random.randrange(len(self.field))),(random.randrange(len(self.field)))]
+        #     count += 1
     
     def print_all_bombs(self):
-        self.game_over = True
-        for bomb_coords in self.coords_of_bombs:
-            bomb_row = self.coords_of_bombs[bomb_coords][0]
-            bomb_col = self.coords_of_bombs[bomb_coords][1]
+        pass
+    #     self.game_over = True
+    #     for bomb_coords in self.coords_of_bombs:
+    #         bomb_row = self.coords_of_bombs[bomb_coords][0]
+    #         bomb_col = self.coords_of_bombs[bomb_coords][1]
 
-            self.field[bomb_row][bomb_col] = '*'
+    #         self.field[bomb_row][bomb_col] = '*'
 
-    def define_square_number(self, coords, is_first_pick = True):
+    def define_square_number(self, coords, is_first_pick=True):
         bomb_counter = 0
         row = coords[0]
         col = coords[1]
@@ -49,14 +51,14 @@ class Minesweeper:
                 #skip iteration if checking square outside of field
                 row_less_than_0 = row + (i-1) <= 0
                 row_more_than_9 = col + (i-1) >= 9
-                if col_less_than_0 or col_more_than_9:
+                if row_less_than_0 or row_more_than_9:
                     continue
 
                 for j in range(3):
                     #skip iteration if checking square outside of field
                     col_less_than_0 = row + (j-1) <= 0
                     col_more_than_9 = col + (j-1) >= 9
-                    if row_less_than_0 or row_more_than_9:
+                    if col_less_than_0 or col_more_than_9:
                         continue
                     
                     #checking whether current square has bomb
@@ -70,11 +72,16 @@ class Minesweeper:
                         if j == 0 and i == 0 and is_first_pick:
                             self.print_all_bombs()
 
-        self.field[row][col] = bomb_counter
+        self.field[row][col] = str(bomb_counter)
 
         #continue when no bombs detected
         if bomb_counter == 0:
-            self.define_bomb_coords([row, col], False)
+            if col <= 8:
+                self.define_square_number([row, col + 1], False)
+            elif row <= 8:
+                self.define_square_number([row + 1, col], False)
+                
+            
 
         
 def play(game):
