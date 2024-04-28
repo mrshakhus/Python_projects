@@ -111,7 +111,8 @@ def play(dim_size=10, bomb_num=10):
         safe = game.dig(row, col)
 
         if not safe and game.board[row][col] != '*':
-            print
+            print('You already digged here. Try another spot')
+            continue
 
         if not safe and game.board[row][col] == '*':
             game.dug = [(r,c) for r in range(dim_size) for c in range(dim_size)]
