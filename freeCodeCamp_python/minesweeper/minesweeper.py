@@ -14,11 +14,11 @@ class Minesweeper:
         return [[' ' for _ in range(10)] for _ in range(10)]
     
     def print_field(self):
-        row_numbers = [str(i) for i in range(10)]
-        print('   '+'  '.join(row_numbers)+' ')
+        col_numbers = [str(i) for i in range(10)]
+        print('   '+'  '.join(col_numbers)+' ')
         print(f'{'-'*34}')
-        for col_number, row_print in enumerate(self.field):
-            print(str(col_number)+ ' |' + ' |'.join(row_print) + ' |')
+        for row_number, row_print in enumerate(self.field):
+            print(str(row_number)+ ' |' + ' |'.join(row_print) + ' |')
 
         print(f'{'-'*34}\n')
         
