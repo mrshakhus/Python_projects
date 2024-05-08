@@ -7,6 +7,7 @@ def start_server():
         server.listen(4)
         print('Working...')
 
+
         while True:
             client_socket, address = server.accept()
             data = client_socket.recv(1024).decode('utf-8')
@@ -36,5 +37,6 @@ def load_page_from_get_request(requested_data):
     
 if __name__ == "__main__":
     start_server()
+    #for commit
 
 
