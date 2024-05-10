@@ -1,23 +1,58 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import ResponseValidationError
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
+from enum import Enum
+from datetime import datetime
 
 
 app = FastAPI(
     title = 'Trading App'
 )
 
-#implementing GET method
+
+#printing in response errors which may occur in server 
+@app.exception_handler(ResponseValidationError)
+async def validation_exception_handler(request: Request, exc: ResponseValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"detail": exc.errors()}),
+    )
+
+
+#implementing GET method and validation of data stored in server
 fake_users = [
     {"id": 1, "role": "admin", "name": "Mike"},
     {"id": 2, "role": "trader", "name": "John"},
-    {"id": 3, "role": "investor", "name": "Steve"}
+    {"id": 3, "role": "investor", "name": "Steve"},
+    {"id": 4, "role": "trader", "name": "Tom", "degree": [
+     {"id": 1, "created_at": "2032-04-23T10:20:30", "degree_type": "expert"}
+        ]},
 ]
 
-@app.get("/users/{user_id}")
+class Degree_type(Enum):
+    newbie = "newbie"
+    expert = "expert"
+
+class Degree(BaseModel):
+    id: int
+    created_at: datetime
+    degree_type: Degree_type
+
+class User(BaseModel):
+    id: int
+    role: str
+    name: str
+    degree: Optional[List[Degree]] = []
+
+@app.get("/users/{user_id}", response_model=List[User])
 def get_user_by_id(user_id: int):
     return [user for user in fake_users if user.get("id") == user_id]
 
+
+#Getting information about trades
 fake_trades = [
     {"id": 1, "user_id": 1, "currency": "BTC", "side": "buy", "price": 57, "amount": 2.12},
     {"id": 2, "user_id": 1, "currency": "ETH", "side": "buy", "price": 50, "amount": 1.32},
@@ -28,7 +63,8 @@ fake_trades = [
 def get_trades(length: int = 1, offset: int = 0):
     return fake_trades[offset:][:length]
 
-#implementing POST method
+
+#implementing POST method and changing name
 fake_users2 = [
     {"id": 1, "role": "admin", "name": "Mike"},
     {"id": 2, "role": "trader", "name": "John"},
