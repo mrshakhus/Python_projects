@@ -4,11 +4,11 @@ from typing import AsyncGenerator
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from sqlalchemy import TIMESTAMP, Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
 from config import DB_PORT, DB_HOST, DB_NAME, DB_USER, DB_PASS
+from models.models import role
 
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
@@ -18,35 +18,20 @@ class Base(DeclarativeBase):
 
 
 class User(SQLAlchemyBaseUserTable[int], Base):
-    Column("id", Integer, primary_key=True),
-    Column("email", String, nullable=False),
-    Column("username", String, nullable=False),
-    Column("password", String, nullable=False),
-    Column("registered_at", TIMESTAMP, default=datetime.now(timezone.utc)),
-    Column("roles_id", Integer, ForeignKey("roles.id")),
+    id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False)
+    username = Column(String, nullable=False)
+    registered_at = Column(TIMESTAMP, default=datetime.now(timezone.utc))
+    role_id = Column(Integer, ForeignKey(role.c.id))
 
-    email: Mapped[str] = mapped_column(
-    String(length=320), unique=True, index=True, nullable=False
-    )
-    hashed_password: Mapped[str] = mapped_column(
-        String(length=1024), nullable=False
-    )
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )
-    is_verified: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
-    )        
+    hashed_password = Column(String(length=1024), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)      
 
 
 engine = create_async_engine(DATABASE_URL)
 async_session_maker = async_sessionmaker(engine, expire_on_commit=False)
-
-
-async def create_db_and_tables():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
