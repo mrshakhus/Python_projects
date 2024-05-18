@@ -1,4 +1,6 @@
+from fastapi_users_db_sqlalchemy import SQLAlchemyBaseUserTable
 from sqlalchemy import MetaData, Table, Column, Integer, String, ForeignKey, JSON, Boolean 
+from src.database import Base
 
 metadata = MetaData()
 
@@ -18,7 +20,19 @@ user = Table(
     Column("username", String, nullable=False),
     Column("hashed_password", String, nullable=False),
     Column("role_id", Integer, ForeignKey(role.c.id)),
+
     Column("is_active", Boolean, default=True, nullable=False),
     Column("is_superuser", Boolean, default=False, nullable=False),
     Column("is_verified", Boolean, default=False, nullable=False),
 )
+
+class User(SQLAlchemyBaseUserTable[int], Base):
+    id = Column(Integer, primary_key=True)
+    email = Column(String, nullable=False)
+    username = Column(String, nullable=False)
+    role_id = Column(Integer, ForeignKey(role.c.id))
+    hashed_password = Column(String(length=1024), nullable=False)
+    
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_superuser = Column(Boolean, default=False, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)  
