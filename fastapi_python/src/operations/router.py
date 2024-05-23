@@ -1,3 +1,4 @@
+from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import delete, insert, select, update
@@ -14,18 +15,18 @@ router = APIRouter(
 )
 
 @router.get("/")
-async def get_specific_operation(id: int, session: AsyncSession = Depends(get_async_session)):
+async def read_specific_operation(id: int, session: AsyncSession = Depends(get_async_session)):
     # try:
         query = select(operation).where(operation.c.id == id)
         result = await session.execute(query)
-        result = jsonable_encoder(result)
-        print(result)
-        return result
-    #     return {
-    #         "status": "succesful",
-    #         "data": result.all(),
-    #         "details": None
-    #     }
+        # return result.all()
+
+        #can't return this
+        return {
+            "status": "succesful",
+            "data": result.all(),
+            "details": None
+        }
     # except:
     #     raise HTTPException(status_code=500, detail={
     #         "status": "error",
@@ -34,7 +35,7 @@ async def get_specific_operation(id: int, session: AsyncSession = Depends(get_as
     #     })
     
 # @router.post("/")
-# async def add_specific_operation(new_operation: OperationCreate, session: AsyncSession = Depends(get_async_session)):
+# async def create_specific_operation(new_operation: OperationCreate, session: AsyncSession = Depends(get_async_session)):
 #     stmt = insert(operation).values(**new_operation.model_dump())
 #     await session.execute(stmt)
 #     await session.commit()
