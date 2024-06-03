@@ -6,3 +6,4 @@ app = FastAPI()
 
 def is_valid_url(url: HttpUrl):
     return True
+
