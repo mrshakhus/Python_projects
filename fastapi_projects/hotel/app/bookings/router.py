@@ -12,5 +12,4 @@ router = APIRouter(
 
 @router.get("", response_model=list[SBooking])
 async def get_bookings(user: Users = Depends(get_current_user)):
-    print(user.email, user.id)
-    return await BookingsDAO.find_all()
+    return await BookingsDAO.find_all(id=user.id)
