@@ -12,20 +12,24 @@ class TokenAbsentException(BookingException):
     detail="Отсутствует токен"
 
 class IncorrectTokenFortmat(BookingException):
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    status_code=status.HTTP_401_UNAUTHORIZED
     detail="Неверный формат токена"
 
 class TokenExpiredException(BookingException):
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    status_code=status.HTTP_401_UNAUTHORIZED
     detail="Токен истек"
 
 class UserIsNotPresentException(BookingException):
     status_code=status.HTTP_401_UNAUTHORIZED
 
 class UserAlreadyExistsException(BookingException):
-    status_code=status.HTTP_409_CONFLICT,
+    status_code=status.HTTP_409_CONFLICT
     detail="Пользователь уже существует"
 
 class IncorrectEmailOrPasswordException(BookingException):
-    status_code=status.HTTP_401_UNAUTHORIZED,
+    status_code=status.HTTP_401_UNAUTHORIZED
     detail="Неверная почта или пароль" 
+
+class RoomCanNotBeBooked(BookingException):
+    status_code=status.HTTP_409_CONFLICT
+    detail="Комната не может быть забронирована"
