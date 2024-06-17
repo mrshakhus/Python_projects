@@ -18,74 +18,78 @@ class HotelDAO(BaseDAO):
         date_from: date,
         date_to: date
     ):
-        #first I need to get available rooms in a hotel
-        #then check whether there are >= 1 room
-
-        #1 Don't know how to do yet
-
-        #2 
         async with async_session_maker() as session:
-            all_booked_rooms = select(Bookings).where(
-                or_(
-                    and_(
-                        Bookings.date_from >= date_from,
-                        Bookings.date_from <= date_to
-                    ),
-                    and_(
-                        Bookings.date_from <= date_from,
-                        Bookings.date_to > date_from
-                    )                    )
-            ).cte("all_booked_rooms")
+            """
+            --1.
+            WITH needed_hotels AS(
+            SELECT id, room_quantity
+            FROM hotels
+            WHERE location LIKE '%Алтай%'
+            ),
+            """
+            needed_hotels = (
+                select(Hotels.id, Hotels.room_quantity)
+                .where(Hotels.location.like(f'%{location}%'))
+                .cte("needed_hotels")
+                )
 
-            hotel_id_of_booked_rooms = (
-                select(
-                    (Rooms.quantity - func.count(all_booked_rooms.c.room_id)
-                    .filter(all_booked_rooms.c.room_id.is_not(None))
-                    .label("rooms_left"))
-                )
-                .select_from(Rooms)
-                .join(
-                    all_booked_rooms,
-                    all_booked_rooms.c.room_id == Rooms.id,
-                )
-                .group_by(Rooms.hotel_id)
+            """
+            --2.
+            all_booked_rooms AS(
+            SELECT room_id
+            FROM bookings
+            WHERE (date_from >= '2023-05-15' AND date_from <= '2023-06-20') OR
+                (date_from <= '2023-05-15' AND date_to > '2023-05-15')
+            ),
+            """
+            all_booked_rooms = (
+                select(Bookings.room_id).where(
+                    or_(
+                        and_(
+                            Bookings.date_from >= date_from,
+                            Bookings.date_from <= date_to
+                        ),
+                        and_(
+                            Bookings.date_from <= date_from,
+                            Bookings.date_to > date_from
+                        )
+                    )
+                ).cte("all_booked_rooms")
             )
 
-            rooms_left = await session.execute(hotel_id_of_booked_rooms)
-            rooms_left: int = rooms_left.scalar()
+            """
+            --3.
+            needed_booked_rooms AS(
+            SELECT hotel_id
+            FROM rooms
+            INNER JOIN all_booked_rooms ON all_booked_rooms.room_id = rooms.id
+            )
+            """
+            needed_booked_rooms = (
+                select(Rooms.hotel_id)
+                .join(
+                    all_booked_rooms,
+                    all_booked_rooms.c.room_id == Rooms.id
+                ).cte("needed_booked_rooms")
+            )
 
-        # async with async_session_maker() as session:
-        #     booked_rooms = select(Bookings).where(
-        #         and_(
-        #             Bookings.room_id == room_id,
-        #             or_(
-        #                 and_(
-        #                     Bookings.date_from >= date_from,
-        #                     Bookings.date_from <= date_to
-        #                 ),
-        #                 and_(
-        #                     Bookings.date_from <= date_from,
-        #                     Bookings.date_to > date_from
-        #                 )
-        #             )
-        #         )
-        #     ).cte("booked_rooms")
+            """
+            --4.
+            SELECT needed_hotels.room_quantity - COUNT(needed_booked_rooms.hotel_id) FROM needed_hotels 
+            LEFT JOIN needed_booked_rooms ON needed_booked_rooms.hotel_id = needed_hotels.id
+            GROUP BY needed_hotels.id, needed_hotels.room_quantity
+            """
+            get_needed_hotels = (
+                select(
+                    needed_hotels.c.room_quantity - func.count(needed_booked_rooms.c.hotel_id)
+                )
+                .join(
+                    needed_booked_rooms,
+                    needed_booked_rooms.c.hotel_id == needed_hotels.c.id,
+                    isouter=True
+                )
+                .group_by(needed_hotels.c.id, needed_hotels.c.room_quantity)
+            )
 
-        #     get_rooms_left = (
-        #         select(
-        #             (Rooms.quantity - func.count(booked_rooms.c.room_id)
-        #             .filter(booked_rooms.c.room_id.is_not(None))
-        #             .label("rooms_left"))
-        #         )
-        #         .select_from(Rooms)
-        #         .join(
-        #             booked_rooms,
-        #             booked_rooms.c.room_id == Rooms.id,
-        #             isouter=True
-        #         )
-        #         .where(Rooms.id == room_id)
-        #         .group_by(Rooms.quantity, booked_rooms.c.room_id)
-        #     )
-
-        #     rooms_left = await session.execute(get_rooms_left)
-        #     rooms_left: int = rooms_left.scalar()
+            needed_hotels = await session.execute(get_needed_hotels)
+            return needed_hotels.mappings().all()
