@@ -9,11 +9,11 @@ from app.users.dependencies import get_current_user
 from app.users.models import Users
 
 router = APIRouter(
-    prefix='/bhotels',
+    prefix='/hotels',
     tags=['Отели']
 )
 
-@router.get("/{location}", status_code=200)
+@router.get("/{location}", status_code=200) # Ideally should validate data
 async def get_hotels(location: str, date_from: date, date_to: date):
     hotels = await HotelDAO.get_all(location, date_from, date_to)
 

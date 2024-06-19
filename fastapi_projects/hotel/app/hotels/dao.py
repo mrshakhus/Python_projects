@@ -6,6 +6,7 @@ from app.dao.base import BaseDAO
 from app.hotels.models import Hotels
 from app.database import async_session_maker
 from app.hotels.rooms.models import Rooms
+import json
 
 
 class HotelDAO(BaseDAO):
@@ -75,13 +76,21 @@ class HotelDAO(BaseDAO):
 
             """
             --4.
-            SELECT needed_hotels.room_quantity - COUNT(needed_booked_rooms.hotel_id) FROM needed_hotels 
-            LEFT JOIN needed_booked_rooms ON needed_booked_rooms.hotel_id = needed_hotels.id
-            GROUP BY needed_hotels.id, needed_hotels.room_quantity
+            calc_needed_hotels AS(
+            SELECT needed_hotels.id, needed_hotels.room_quantity - COUNT(needed_booked_rooms.hotel_id)
+            AS rooms_left
+            FROM needed_hotels 
+            LEFT JOIN needed_booked_rooms 
+            ON needed_booked_rooms.hotel_id = needed_hotels.id
+            GROUP BY needed_hotels.room_quantity, needed_hotels.id
+            HAVING needed_hotels.room_quantity - COUNT(needed_booked_rooms.hotel_id) > 0
+            )
             """
-            get_needed_hotels = (
+            calc_needed_hotels = (
                 select(
-                    needed_hotels.c.room_quantity - func.count(needed_booked_rooms.c.hotel_id)
+                    needed_hotels.c.id,
+                    (needed_hotels.c.room_quantity - func.count(needed_booked_rooms.c.hotel_id))
+                    .label('rooms_left')
                 )
                 .join(
                     needed_booked_rooms,
@@ -89,7 +98,32 @@ class HotelDAO(BaseDAO):
                     isouter=True
                 )
                 .group_by(needed_hotels.c.id, needed_hotels.c.room_quantity)
+                .having((needed_hotels.c.room_quantity - func.count(needed_booked_rooms.c.hotel_id)) > 0)
+            ).cte("calc_needed_hotels")
+
+            """
+            SELECT * 
+            FROM hotels
+            INNER JOIN calc_needed_hotels
+            ON calc_needed_hotels.id = hotels.id
+            """
+
+            get_needed_hotels = (
+                select(Hotels, calc_needed_hotels.c.rooms_left)
+                .join(
+                    calc_needed_hotels,
+                    calc_needed_hotels.c.id == Hotels.id
+                )
             )
 
-            needed_hotels = await session.execute(get_needed_hotels)
-            return needed_hotels.mappings().all()
+            result = await session.execute(get_needed_hotels)
+            result = result.mappings().all()
+
+            needed_hotels = []
+            for row in result:
+                hotel = row.Hotels.__dict__.copy()
+                hotel['rooms_left'] = row.rooms_left
+                needed_hotels.append(hotel)
+                print(row)
+
+            return needed_hotels
