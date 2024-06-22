@@ -29,7 +29,7 @@ class HotelDAO(BaseDAO):
             """
             needed_hotels = (
                 select(Hotels.id, Hotels.room_quantity)
-                .where(Hotels.location.like(f'%{location}%'))
+                .where(Hotels.location.like(f'%{location.strip()}%'))
                 .cte("needed_hotels")
                 )
 

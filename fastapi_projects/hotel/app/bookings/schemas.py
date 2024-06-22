@@ -10,9 +10,5 @@ class SBooking(BaseModel):
     price: int
     total_cost: int
     total_days: int
-    # image_id: int
-    # name: str
-    # description: str
-    # services: JSON
 
     model_config = ConfigDict(from_attributes=True)
