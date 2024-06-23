@@ -3,6 +3,7 @@ from typing import AsyncIterator
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from app.config import settings
 from app.bookings.router import router as bookings_router
 from app.users.router import router as users_router
 from app.hotels.router import router as hotels_router
@@ -15,7 +16,7 @@ from redis import asyncio as aioredis
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    redis = await aioredis.from_url("redis://localhost:6379")
+    redis = await aioredis.from_url(f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}")
     FastAPICache.init(RedisBackend(redis), prefix="cache")
     yield
     await redis.close()

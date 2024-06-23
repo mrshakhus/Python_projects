@@ -2,6 +2,7 @@ from datetime import date
 
 from sqlalchemy import and_, delete, func, insert, or_, select
 from app.bookings.models import Bookings
+from app.bookings.schemas import SBooking
 from app.dao.base import BaseDAO
 
 from app.database import async_session_maker, engine
@@ -84,16 +85,15 @@ class BookingDAO(BaseDAO):
                         date_to=date_to,
                         price=price,
                     ).returning(
-                        Bookings.room_id,
-                        Bookings.user_id,
-                        Bookings.date_from,
-                        Bookings.date_to,
-                        Bookings.price,
+                        Bookings
                     )
                 )
                 booking = await session.execute(add_new_booking)
                 await session.commit()
-                return booking.mappings().one()
+                # result = booking.scalars().one()
+                result = booking.mappings().one()["Bookings"]
+                # return SBooking.from_orm(result)
+                return SBooking.model_validate(result) 
             else:
                 return None
 

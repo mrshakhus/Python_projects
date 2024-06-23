@@ -13,7 +13,7 @@ router = APIRouter(
     tags=['Отели']
 )
 
-@router.get("/{location}", status_code=200) # Ideally should validate data
+@router.get("/{location}", status_code=200) #TO DO new schema HotelInfo
 @cache(expire=30)
 async def get_hotels(location: str, date_from: date, date_to: date):
     await asyncio.sleep(3)
