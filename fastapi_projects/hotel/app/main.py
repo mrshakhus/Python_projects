@@ -3,7 +3,11 @@ from typing import AsyncIterator
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from sqladmin import Admin
+from app.admin.views import BookingsAdmin, HotelsAdmin, RoomsAdmin, UsersAdmin
+from app.admin.auth import authentication_backend
 from app.config import settings
+from app.database import engine
 from app.bookings.router import router as bookings_router
 from app.users.router import router as users_router
 from app.hotels.router import router as hotels_router
@@ -45,3 +49,10 @@ app.add_middleware(
                    "Access-Control-Allow-Origin", "Authorization"],
 )
 
+
+admin = Admin(app, engine, authentication_backend=authentication_backend)
+
+admin.add_view(UsersAdmin)
+admin.add_view(HotelsAdmin)
+admin.add_view(RoomsAdmin)
+admin.add_view(BookingsAdmin)

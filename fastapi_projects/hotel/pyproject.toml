@@ -18,6 +18,8 @@ fastapi-cache2 = {extras = ["redis"], version = "^0.2.1"}
 celery = "^5.4.0"
 flower = "^2.0.1"
 pillow = "^10.3.0"
+sqladmin = "^0.17.0"
+pytest = "^8.2.2"
 
 
 [build-system]
