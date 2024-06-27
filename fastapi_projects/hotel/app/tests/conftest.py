@@ -1,7 +1,13 @@
 import asyncio
 from datetime import datetime
+
+from functools import wraps
+from unittest import mock
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
 import json
-from httpx import ASGITransport, AsyncClient
+from fastapi_cache import FastAPICache
+from httpx import ASGITransport, AsyncClient, patch
 import pytest
 from sqlalchemy import insert
 from app.config import settings
@@ -52,18 +58,40 @@ async def prepare_database():
 
 
 # Взято из документации к pytest-asyncio
+# @pytest.fixture(scope="session")
+# def event_loop():
+#     """Create an instance of the default event loop for each test case."""
+#     loop = asyncio.new_event_loop()
+#     yield loop
+#     loop.close() 
+
+
+
 @pytest.fixture(scope="session")
-def event_loop():
-    """Create an instance of the default event loop for each test case."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
-    yield loop
-    loop.close()
+def test_app():
+    # Create a test instance of the app
+    FastAPICache.init("null")
+    fastapi_app.dependency_overrides = {}
+    yield fastapi_app
+    FastAPICache.reset()
 
 
 @pytest.fixture(scope="function")
-async def ac():
-    transport = ASGITransport(app=fastapi_app)
+async def ac(test_app):
+    transport = ASGITransport(app=test_app)
     async with AsyncClient(transport=transport, base_url="https://test") as ac:
+        yield ac
+
+
+@pytest.fixture(scope="session")
+async def authenticated_ac(test_app):
+    transport = ASGITransport(app=test_app)
+    async with AsyncClient(transport=transport, base_url="https://test") as ac:
+        await ac.post("/auth/login", json={
+            "email": "test@test.com",
+            "password": "test",
+        })
+        assert ac.cookies["booking_access_token"]
         yield ac
 
     

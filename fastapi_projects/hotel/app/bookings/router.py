@@ -17,9 +17,9 @@ router = APIRouter(
 
 @router.get("", response_model=list[SBooking])
 async def get_bookings(user: Users = Depends(get_current_user)):
-    return await BookingDAO.find_all(id=user.id)
+    return await BookingDAO.find_all(user_id=user.id)
 
-@router.post("", status_code=201)
+@router.post("", status_code=200)
 async def add_booking(
     room_id: int, date_from: date, date_to: date,
     user: Users = Depends(get_current_user),

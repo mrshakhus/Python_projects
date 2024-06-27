@@ -33,3 +33,11 @@ class IncorrectEmailOrPasswordException(BookingException):
 class RoomCanNotBeBooked(BookingException):
     status_code=status.HTTP_409_CONFLICT
     detail="Комната не может быть забронирована"
+
+class WrongDatesException(BookingException):
+    status_code=status.HTTP_400_BAD_REQUEST
+    detail="Указаны некорректные даты"
+
+class MoreThan30DaysException(BookingException):
+    status_code=status.HTTP_400_BAD_REQUEST
+    detail="Указанный период больше 30 дней"

@@ -4,6 +4,7 @@ from fastapi_cache.decorator import cache
 from fastapi import APIRouter
 from pydantic import TypeAdapter
 
+from app.exceptions import MoreThan30DaysException, WrongDatesException
 from app.hotels.dao import HotelDAO
 from app.hotels.schemas import SHotels
 
@@ -16,7 +17,11 @@ router = APIRouter(
 @router.get("/{location}", status_code=200) #TO DO new schema HotelInfo
 @cache(expire=30)
 async def get_hotels(location: str, date_from: date, date_to: date):
-    await asyncio.sleep(3)
+    if date_from >= date_to:
+        raise WrongDatesException
+    elif (date_to - date_from).days > 30:
+        raise MoreThan30DaysException
+    
     hotels = await HotelDAO.get_all_hotels(location, date_from, date_to)
     hotels_adapter = TypeAdapter(list[SHotels])
     hotels_json = hotels_adapter.validate_python(hotels)
