@@ -84,12 +84,12 @@ async def ac(test_app):
 
 
 @pytest.fixture(scope="session")
-async def authenticated_ac(test_app):
+async def authenticated_ac(test_app, request):
     transport = ASGITransport(app=test_app)
     async with AsyncClient(transport=transport, base_url="https://test") as ac:
         await ac.post("/auth/login", json={
-            "email": "test@test.com",
-            "password": "test",
+            "email": request.param["email"],
+            "password": request.param["password"],
         })
         assert ac.cookies["booking_access_token"]
         yield ac
