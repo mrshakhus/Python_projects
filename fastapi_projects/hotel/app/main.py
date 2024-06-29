@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+import time
+import sentry_sdk
 from typing import AsyncIterator
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
@@ -13,10 +15,24 @@ from app.users.router import router as users_router
 from app.hotels.router import router as hotels_router
 from app.pages.router import router as pages_router
 from app.images.router import router as images_router
+from app.logger import logger
+from fastapi_versioning import VersionedFastAPI
 
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
+
+
+sentry_sdk.init(
+    dsn="https://c454e49e1eef029a7828e0ee29639197@o4507515494596608.ingest.de.sentry.io/4507515501346896",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -27,7 +43,6 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(lifespan=lifespan)
 
-app.mount("/static", StaticFiles(directory="app/static"), "static")
 
 app.include_router(users_router)
 app.include_router(hotels_router)
@@ -50,9 +65,34 @@ app.add_middleware(
 )
 
 
+# @app.middleware("http")
+# async def add_process_time_header(request: Request, call_next):
+#     start_time = time.time()
+#     response = await call_next(request)
+#     process_time = time.time() - start_time
+#     logger.info("Request handling time", extra={
+#         "process_time": round(process_time, 4)
+#     })
+#     response.headers["X-Process-Time"] = str(process_time)
+#     return response
+
+
+app = VersionedFastAPI(app,
+    version_format='{major}',
+    prefix_format='/v{major}',
+    description='Greet users with a nice message',
+    # middleware=[
+    #     Middleware(SessionMiddleware, secret_key='mysecretkey')
+    # ]
+)
+
+
 admin = Admin(app, engine, authentication_backend=authentication_backend)
 
 admin.add_view(UsersAdmin)
 admin.add_view(HotelsAdmin)
 admin.add_view(RoomsAdmin)
 admin.add_view(BookingsAdmin)
+
+
+app.mount("/static", StaticFiles(directory="app/static"), "static")
