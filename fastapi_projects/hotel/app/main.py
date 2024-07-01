@@ -15,6 +15,7 @@ from app.users.router import router as users_router
 from app.hotels.router import router as hotels_router
 from app.pages.router import router as pages_router
 from app.images.router import router as images_router
+from app.csv_files.router import router as csv_files_router
 from app.logger import logger
 from fastapi_versioning import VersionedFastAPI
 
@@ -49,6 +50,7 @@ app.include_router(hotels_router)
 app.include_router(bookings_router)
 app.include_router(pages_router)
 app.include_router(images_router)
+app.include_router(csv_files_router)
 
 origins = [
     # 3000 - порт, на котором работает фронтенд на React.js 

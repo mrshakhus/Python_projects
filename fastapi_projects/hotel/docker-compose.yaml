@@ -1,4 +1,3 @@
-version: '3.8'
 services: 
   db: 
     image: postgres:16.3
@@ -6,9 +5,8 @@ services:
     env_file:
       - .env-not-dev
     ports:
-      - 5432:5432
+      - "5432:5432"
     
-
   redis:
     image: redis:7
     container_name: booking_redis
@@ -22,7 +20,9 @@ services:
     container_name: booking_app
     command: ['/booking/docker/app.sh']
     ports:
-      - 7777:8000
+      - "7777:8000"
+    env_file:
+      - .env-not-dev
     depends_on:
       - db
       - redis
@@ -49,4 +49,4 @@ services:
     depends_on:
       - redis
     ports:
-      - 5555:5555
+      - "5555:5555"
