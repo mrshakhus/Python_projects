@@ -38,6 +38,17 @@ services:
     depends_on:
       - redis
 
+  celery_beat:
+    image: booking_celery
+    build:
+      context: .
+    container_name: booking_celery_beat
+    command: sh -c "celery --app=app.tasks.celery:celery worker -l INFO -B"
+    env_file:
+      - .env-not-dev
+    depends_on:
+      - redis
+
   flower:
     image: flower_image
     build:

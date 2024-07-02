@@ -1,11 +1,8 @@
-import json
 import shutil
 import pandas as pd
 from fastapi import APIRouter, UploadFile
-from sqlalchemy import insert
-from app.database import engine
-from app.hotels.models import Hotels
-from app.database import async_session_maker
+
+from app.csv_files.dao import SCV_files
 
 
 router = APIRouter(
@@ -13,33 +10,26 @@ router = APIRouter(
     tags = ["Загрузка csv файлов"]
 )
 
-@router.post("/hotels")
-async def upload_hotels_csv_file(file: UploadFile):
-    file_path = "app/static/csv_files/hotel.csv"
+
+def save_file_retutn_df(file: UploadFile, file_name: str):
+    file_path = f"app/static/csv_files/{file_name}.csv"
     with open(file_path, "wb+") as file_object:
         shutil.copyfileobj(file.file, file_object)
 
-        # df = pd.read_csv(file_path)
-        # df.to_sql('hotels', con=engine, if_exists='append', index=False)
-
-    df = pd.read_csv(file_path, delimiter=';')
-
-    async with async_session_maker() as session:
-        for index, row in df.iterrows():
-            print(json.loads(row['services']))
-            hotel = {
-                "name": row['name'],
-                "location": row['location'],
-                "services": row['services'],
-                "room_quantity": row['room_quantity'],
-                "image_id": row['image_id']
-            }
+    df = pd.read_csv(file_path, delimiter=';', encoding='utf-8')
+    return df
 
 
-            # add_hotel = (
-            #     insert(Hotels)
-            #     .values(hotel)
-            # )
-            # await session.execute(add_hotel)
+@router.post("/hotels")
+async def upload_hotels_csv_file(file: UploadFile):
+    df = save_file_retutn_df(file, "hotels")
+    await SCV_files.add_hotels(df)
 
-        # await session.commit()
+
+@router.post("/rooms")
+async def upload_rooms_csv_file(file: UploadFile):
+    df = save_file_retutn_df(file, "rooms")
+    await SCV_files.add_rooms(df)
+
+    
+
