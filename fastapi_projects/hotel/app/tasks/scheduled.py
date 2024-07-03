@@ -1,5 +1,10 @@
 from app.tasks.celery import celery
 
-@celery.task(name="periodic_task")
-def periodic_task():
-    print("Celery beat working!")
+@celery.task(name="tomorrow_check_in")
+def tomorrow_check_in():
+    """
+    Таска будет напоминать о бронировании тем пользователям, у кого на завтра запланирован заезд в отель. Таска/функция должна выполняться каждый день в 9 утра (задайте через crontab)
+    """
+    # Из бд надо достать бронирования
+    # посмотреть, у кого заезд завтра
+    # найдя такого пользователя, ему на почту отправить письмо

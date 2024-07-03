@@ -15,8 +15,8 @@ celery = Celery(
 
 celery.conf.beat_schedule = {
     "any_name": {
-        "task": "peridic_task",
+        "task": "tomorrow_check_in",
         # "schedule": 5 #seconds
-        "schedule": crontab(minutes="0", hour="9")
+        "schedule": crontab(minute="0", hour="9")
     }
 }
