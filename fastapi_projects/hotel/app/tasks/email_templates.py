@@ -27,11 +27,16 @@ def create_booking_confirmation_template(
 def create_booking_notification_template(
         email_to: EmailStr,
         date_from: date,
-        date_to: date
+        date_to: date,
+        days_before_check_in: int
 ):
     email = EmailMessage()
 
-    email["Subject"] = "У вас завтра заселение"
+    if days_before_check_in == 1:
+        email["Subject"] = "У вас завтра заселение"
+    elif days_before_check_in == 3:
+        email["Subject"] = "Осталось 3 дня до заселения"
+
     email["From"] = settings.SMTP_USER
     email["To"] = email_to
 

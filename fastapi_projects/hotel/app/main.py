@@ -1,8 +1,8 @@
 from contextlib import asynccontextmanager
-import time
 import sentry_sdk
+from prometheus_fastapi_instrumentator import Instrumentator
 from typing import AsyncIterator
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from sqladmin import Admin
@@ -87,6 +87,13 @@ app = VersionedFastAPI(app,
     #     Middleware(SessionMiddleware, secret_key='mysecretkey')
     # ]
 )
+
+
+instrumentator = Instrumentator(
+    should_group_status_codes=False,
+    excluded_handlers=[".*admin.*", "/metrics"],
+)
+instrumentator.instrument(app).expose(app)
 
 
 admin = Admin(app, engine, authentication_backend=authentication_backend)

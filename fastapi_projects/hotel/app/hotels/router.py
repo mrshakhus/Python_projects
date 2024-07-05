@@ -46,25 +46,21 @@ async def get_hotel(hotel_id: int):
 
 
 #for testing:
-@router.get("")
-async def send_notification_1_day_email(
-    # booking: dict,
-    email_to: EmailStr
-):
-    """
-    Таска будет напоминать о бронировании тем пользователям, у кого на завтра запланирован заезд в отель. Таска/функция должна выполняться каждый день в 9 утра (задайте через crontab)
-    """
-    todays_date = datetime.now(timezone.utc).date() #get_day_before_users(todays_date)
-    users = await BookingTaskDAO.get_day_before_users(date(2030,6,5))
-    print(users)
+# @router.get("")
+# async def send_notification_1_day_email():
+#     """
+#     Таска будет напоминать о бронировании тем пользователям, у кого на завтра запланирован заезд в отель. Таска/функция должна выполняться каждый день в 9 утра (задайте через crontab)
+#     """
+#     todays_date = datetime.now(timezone.utc).date() #get_day_before_users(todays_date)
+#     users = await BookingTaskDAO.get_users_for_notification(date(2030,6,5), 1)
 
-    for user in users:
-        msg_content = create_booking_notification_template(
-            user["email"], 
-            user["date_from"],
-            user["date_to"]
-        )
+#     for user in users:
+#         msg_content = create_booking_notification_template(
+#             user["email"], 
+#             user["date_from"],
+#             user["date_to"]
+#         )
 
-        with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
-            server.login(settings.SMTP_USER, settings.SMTP_PASS)
-            server.send_message(msg_content)
+#         with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+#             server.login(settings.SMTP_USER, settings.SMTP_PASS)
+#             server.send_message(msg_content)

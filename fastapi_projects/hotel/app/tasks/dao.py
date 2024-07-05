@@ -9,9 +9,10 @@ from app.database import async_session_maker
 
 class BookingTaskDAO():
     @classmethod
-    async def get_day_before_users(
+    async def get_users_for_notification(
         cls,
-        date_from: DATE
+        date_from: DATE,
+        days_before_check_in: int
     ):
         # Из бд надо достать бронирования
         # посмотреть, у кого заезд завтра
@@ -27,7 +28,7 @@ class BookingTaskDAO():
             needed_bookings = (
             select(Bookings.user_id, Bookings.date_from, Bookings.date_to)
             .where(
-                (Bookings.date_from - date_from) == 1
+                (Bookings.date_from - date_from) == days_before_check_in
             )
         ).cte("needed_bookings")
 
