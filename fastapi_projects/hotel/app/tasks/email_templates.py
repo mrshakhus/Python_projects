@@ -24,7 +24,7 @@ def create_booking_confirmation_template(
 
     return email
 
-def create_booking_notification_template(
+async def create_booking_notification_template(
         email_to: EmailStr,
         date_from: date,
         date_to: date,

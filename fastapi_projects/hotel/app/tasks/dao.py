@@ -2,8 +2,10 @@ from datetime import date
 
 from sqlalchemy import DATE, func, select
 
-from app.bookings.models import Bookings
 from app.users.models import Users
+from app.hotels.rooms.models import Rooms
+from app.hotels.models import Hotels
+from app.bookings.models import Bookings
 from app.database import async_session_maker
 
 
@@ -11,7 +13,7 @@ class BookingTaskDAO():
     @classmethod
     async def get_users_for_notification(
         cls,
-        date_from: DATE,
+        date_from: date,
         days_before_check_in: int
     ):
         # Из бд надо достать бронирования

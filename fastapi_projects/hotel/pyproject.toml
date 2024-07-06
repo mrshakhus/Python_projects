@@ -34,6 +34,7 @@ gunicorn = "^22.0.0"
 poetry-plugin-export = "^1.8.0"
 pandas = "^2.2.2"
 prometheus-fastapi-instrumentator = "^7.0.0"
+asgiref = "^3.8.1"
 
 [tool.black]
 line-length = 88

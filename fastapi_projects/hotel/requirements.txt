@@ -4,6 +4,7 @@ alembic==1.13.1
 amqp==5.2.0
 annotated-types==0.7.0
 anyio==4.4.0
+asgiref==3.8.1
 asyncpg==0.29.0
 attrs==23.2.0
 autoflake==2.3.1
@@ -77,6 +78,7 @@ pluggy==1.5.0
 poetry==1.8.3
 poetry-core==1.9.0
 poetry-plugin-export==1.8.0
+prometheus-fastapi-instrumentator==7.0.0
 prometheus_client==0.20.0
 prompt_toolkit==3.0.47
 ptyprocess==0.7.0
